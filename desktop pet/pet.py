@@ -51,6 +51,9 @@ def play_animation():
     # print("animation")
     window.after(animation_spd, update)
 
+def set_state(new_state):
+    pass
+    
 def determine_state():
     """picks new state every run"""
     pass
