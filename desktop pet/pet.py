@@ -1,5 +1,4 @@
 import random
-from screeninfo import get_monitors
 import tkinter as tk
 
 window = tk.Tk()
