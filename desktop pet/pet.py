@@ -1,4 +1,5 @@
 import random
+from screeninfo import get_monitors
 import tkinter as tk
 
 window = tk.Tk()
@@ -9,9 +10,13 @@ state = 0 #determines which behaviour
 #move state
 #wake up state
 start_pos_y = [800]
-pos_x = 1000
+screen_width = get_monitors()[0].width
+screen_height = get_monitors()[0].height
+print(f"width {screen_width}")
+pos_x = int(screen_width * 0.85)
+pet_size = 100
 task_bar_size = 40
-pos_y = 720 - task_bar_size - 100
+pos_y = screen_height - task_bar_size - pet_size
 
 #[all animations]
 idle = [tk.PhotoImage(file=import_path+'idle.gif',format = 'gif -index %i' %(i)) for i in range(5)]#idle gif
@@ -20,7 +25,7 @@ sleep = [tk.PhotoImage(file=import_path+'sleep.gif',format = 'gif -index %i' %(i
 sleep_to_idle = [tk.PhotoImage(file=import_path+'sleep_to_idle.gif',format = 'gif -index %i' %(i)) for i in range(8)]#sleep to idle gif
 walk_positive = [tk.PhotoImage(file=import_path+'walking_positive.gif',format = 'gif -index %i' %(i)) for i in range(8)]#walk to left gif
 walk_negative = [tk.PhotoImage(file=import_path+'walking_negative.gif',format = 'gif -index %i' %(i)) for i in range(8)]#walk to right gif
-kitty_sandwich = [tk.PhotoImage(file=import_path+'kitty_sandwich.gif',format = 'gif -index %i' %(i)) for i in range(15)]
+#kitty_sandwich = [tk.PhotoImage(file=import_path+'kitty_sandwich.gif',format = 'gif -index %i' %(i)) for i in range(15)]
 
 animations = {
     "idle":{
@@ -48,7 +53,7 @@ frame = animations.get(current_animation).get("animation")[0] #current frame of 
 
 def update_geometry(x = 500,y = 600):
     # print("update geometry")
-    window.geometry('100x100+'+str(x)+"+"+str(y))
+    window.geometry(str(pet_size)+'x'+str(pet_size)+"+"+str(x)+"+"+str(y))
 
 def play_animation():
     global cycle
@@ -112,7 +117,7 @@ def update():
     #window.after(1, update)
 
 def mouseClick(event):
-    print("meoew")
+    print("meow")
 
 #loop the program
 window.after(1,update)
