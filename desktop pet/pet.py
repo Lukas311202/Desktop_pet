@@ -1,5 +1,5 @@
 import random
-from screeninfo import get_monitors
+import ctypes
 import tkinter as tk
 
 window = tk.Tk()
@@ -9,9 +9,9 @@ state = 0 #determines which behaviour
 #sleep state
 #move state
 #wake up state
+user32 = ctypes.windll.user32
 start_pos_y = [800]
-screen_width = get_monitors()[0].width
-screen_height = get_monitors()[0].height
+screen_width, screen_height = user32.GetSystemMetrics(0), user32.GetSystemMetrics(1)
 print(f"width {screen_width}")
 pos_x = int(screen_width * 0.85)
 pet_size = 100
