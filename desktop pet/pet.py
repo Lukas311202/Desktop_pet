@@ -1,10 +1,12 @@
 import random
 import ctypes
+from turtle import window_width
+import move_window
 import tkinter as tk
 
 window = tk.Tk()
 import_path = "animations/"
-state = 0 #determines which behaviour
+state = 2 #determines which behaviour
 #idle state
 #sleep state
 #move state
@@ -13,10 +15,12 @@ user32 = ctypes.windll.user32
 start_pos_y = [800]
 screen_width, screen_height = user32.GetSystemMetrics(0), user32.GetSystemMetrics(1)
 print(f"width {screen_width}")
+window_title = "Editor"
 pos_x = int(screen_width * 0.85)
 pet_size = 100
 task_bar_size = 40
 pos_y = screen_height - task_bar_size - pet_size
+window_pos = [screen_width, 100]
 
 #[all animations]
 idle = [tk.PhotoImage(file=import_path+'idle.gif',format = 'gif -index %i' %(i)) for i in range(5)]#idle gif
@@ -41,6 +45,11 @@ animations = {
         "animation":sleep,
         "spd":800,
         'repetition':5
+    },
+    "drag_window":{
+        "animation":idle,
+        "spd":300,
+        'repetition':10
     }
 }
 
@@ -75,6 +84,8 @@ def set_state(new_state):
     global animation_spd
     global cycle
     global repetition
+    global window_pos
+
     if new_state == state:
         return
     state = new_state
@@ -84,6 +95,10 @@ def set_state(new_state):
             state_str = 'idle'
         case 1:
             state_str = 'sleep'
+        case 2:
+            state_str = 'drag_window'
+            # window_pos = [screen_width, 100]
+            
         
     current_animation = state_str
     animation_spd = animations.get(current_animation).get('spd')
@@ -94,12 +109,14 @@ def set_state(new_state):
     
 def determine_state():
     """picks new state every run"""
-    new_state = random.randint(0,1)
+    new_state = random.randint(0,2)
     set_state(new_state)
 
 def update():
     global pos_x
+    global pos_y
     global state
+    global window_pos
     
     match state:
         case 0:
@@ -110,6 +127,14 @@ def update():
             #pos_x-= move_spd
             if pos_x < 0:
                 state = 0
+        case 2:
+            #drag window
+            pos_x = move_window.get_window_position(window_title).left - 100
+            pos_y = move_window.get_window_position(window_title).top + 100
+
+            window_pos[0] -= 5
+            move_window.move_window(window_title, window_pos)
+
     
     update_geometry(pos_x, pos_y)
     if repetition >= animations.get(current_animation).get('repetition'): determine_state()
