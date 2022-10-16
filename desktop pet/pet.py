@@ -1,6 +1,6 @@
 import random
 import ctypes
-from turtle import window_width
+from turtle import title, window_width
 import move_window
 import tkinter as tk
 
@@ -129,11 +129,16 @@ def update():
                 state = 0
         case 2:
             #drag window
-            pos_x = move_window.get_window_position(window_title).left - 100
-            pos_y = move_window.get_window_position(window_title).top + 100
+            if move_window.window_exists(window_title):
 
-            window_pos[0] -= 5
-            move_window.move_window(window_title, window_pos)
+                pos_x = move_window.get_window_position(window_title).left - 100
+                pos_y = move_window.get_window_position(window_title).top + 100
+
+                window_pos[0] -= 5
+                move_window.move_window(window_title, window_pos)
+            else:
+                print(f'window with title {window_title} does not exist')
+                set_state(0)
 
     
     update_geometry(pos_x, pos_y)
