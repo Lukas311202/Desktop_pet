@@ -1,171 +1,119 @@
 import random
-import ctypes
-from turtle import title, window_width
-import move_window
+from sre_parse import State
 import tkinter as tk
 
-window = tk.Tk()
-import_path = "animations/"
-state = 2 #determines which behaviour
-#idle state
-#sleep state
-#move state
-#wake up state
-user32 = ctypes.windll.user32
-start_pos_y = [800]
-screen_width, screen_height = user32.GetSystemMetrics(0), user32.GetSystemMetrics(1)
-print(f"width {screen_width}")
-window_title = "Editor"
-pos_x = int(screen_width * 0.85)
-pet_size = 100
-task_bar_size = 40
-pos_y = screen_height - task_bar_size - pet_size
-window_pos = [screen_width, 100]
-
-#[all animations]
-idle = [tk.PhotoImage(file=import_path+'idle.gif',format = 'gif -index %i' %(i)) for i in range(5)]#idle gif
-idle_to_sleep = [tk.PhotoImage(file=import_path+'idle_to_sleep.gif',format = 'gif -index %i' %(i)) for i in range(8)]#idle to sleep gif
-sleep = [tk.PhotoImage(file=import_path+'sleep.gif',format = 'gif -index %i' %(i)) for i in range(3)]#sleep gif
-sleep_to_idle = [tk.PhotoImage(file=import_path+'sleep_to_idle.gif',format = 'gif -index %i' %(i)) for i in range(8)]#sleep to idle gif
-walk_positive = [tk.PhotoImage(file=import_path+'walking_positive.gif',format = 'gif -index %i' %(i)) for i in range(8)]#walk to left gif
-walk_negative = [tk.PhotoImage(file=import_path+'walking_negative.gif',format = 'gif -index %i' %(i)) for i in range(8)]#walk to right gif
-#kitty_sandwich = [tk.PhotoImage(file=import_path+'kitty_sandwich.gif',format = 'gif -index %i' %(i)) for i in range(15)]
-
-animations = {
-    "idle":{
-        "animation":idle,
-        "spd":200,
-        'repetition':20
-        },
-    "idle_to_sleep":{
-        "animation":idle_to_sleep,
-        "spd":200
-    },
-    "sleep":{
-        "animation":sleep,
-        "spd":800,
-        'repetition':5
-    },
-    "drag_window":{
-        "animation":idle,
-        "spd":300,
-        'repetition':10
-    }
-}
-
-repetition = 0
-cycle = 0
-current_animation = "idle"
-animation_spd = animations.get(current_animation).get("spd")
-move_spd = 1
-frame = animations.get(current_animation).get("animation")[0] #current frame of the animation
-
-def update_geometry(x = 500,y = 600):
-    # print("update geometry")
-    window.geometry(str(pet_size)+'x'+str(pet_size)+"+"+str(x)+"+"+str(y))
-
-def play_animation():
-    global cycle
-    global repetition
-   # print(f"cycle: {cycle}")
-    cycle += 1
-    if cycle >= len(animations.get(current_animation).get("animation")): 
-        cycle = 0
-        repetition += 1
-        
-    frame = animations.get(current_animation).get("animation")[cycle]
-    label.configure(image=frame)
-    # print("animation")
-    window.after(animation_spd, update)
-
-def set_state(new_state):
-    global state
-    global current_animation
-    global animation_spd
-    global cycle
-    global repetition
-    global window_pos
-
-    if new_state == state:
-        return
-    state = new_state
-    state_str = ""
-    match state:
-        case 0:
-            state_str = 'idle'
-        case 1:
-            state_str = 'sleep'
-        case 2:
-            state_str = 'drag_window'
-            # window_pos = [screen_width, 100]
-            
-        
-    current_animation = state_str
-    animation_spd = animations.get(current_animation).get('spd')
+class pet:
+    window = tk.Tk()
+    init_state = "idle"
+    state = init_state
+    current_animation = 0
+    animation_frames = 0
+    animation_cycle = 0
+    animation_spd = 100
+    UPDATE_SPD = 1
+    animation_repetition = 1
     cycle = 0
     repetition = 0
+    frame = [tk.PhotoImage(file="animations/idle.gif",format = 'gif -index %i' %(i)) for i in range(5)][0]
+    label = tk.Label(window,bd=0,bg='black')
+
+
+    states_data = {}
     
-    print(f'enter state ',state_str)
+
+    def __init__(self) -> None:
+        pass
+
+    def add_state(self, state_name, animation, behaviour, animation_spd = 100, repetition = 1):
+        self.states_data[state_name] = {
+            "animation":animation,
+            "animation_spd":animation_spd,
+            "repetition":repetition,
+            "behaviour":behaviour
+        }
+
+
+    def set_state(self, new_state):
+
+        self.state = new_state
+        self.animation_spd = self.states_data.get(new_state).get('animation_spd')
+        self.animation_repetition = self.states_data.get(new_state).get('repetition')
+        self.animation_frames = len(self.states_data.get(new_state).get('animation'))
+        self.cycle = 0
+        self.animation_cycle = 0
+        self.repetition = 0
     
-def determine_state():
-    """picks new state every run"""
-    new_state = random.randint(0,2)
-    set_state(new_state)
-
-def update():
-    global pos_x
-    global pos_y
-    global state
-    global window_pos
+        print(f'enter state ',new_state)
     
-    match state:
-        case 0:
-            #pos_x+= move_spd
-            if pos_x > 1920:
-                state = 1
-        case 1:
-            #pos_x-= move_spd
-            if pos_x < 0:
-                state = 0
-        case 2:
-            #drag window
-            if move_window.window_exists(window_title):
+    def choose_random_state(self):
+        return random.choice(list(self.states_data.keys())) 
+        # self.set_state(new_state)
 
-                pos_x = move_window.get_window_position(window_title).left - 100
-                pos_y = move_window.get_window_position(window_title).top + 100
+    pick_state = choose_random_state
+    """holds the function that changes the state"""
 
-                window_pos[0] -= 5
-                move_window.move_window(window_title, window_pos)
-            else:
-                print(f'window with title {window_title} does not exist')
-                set_state(0)
+    def play_animation(self):
+        self.animation_cycle += 1
+        # self.cycle+=1
+        # print(self.animation_cycle)
+        if self.animation_cycle >= self.animation_spd:
+            self.cycle += 1
+            self.animation_cycle = 0
+        
+        if self.cycle == self.animation_frames: 
+            self.cycle = 0
+            self.repetition += 1
+            
+        frame = self.states_data.get(self.state).get('animation')[self.cycle] # frame = animations.get(current_animation).get("animation")[cycle]
+        # print(frame)
+        self.label.configure(image=frame)
+        # print("animation")
+        self.window.after(self.UPDATE_SPD, self.update)
 
-    
-    update_geometry(pos_x, pos_y)
-    if repetition >= animations.get(current_animation).get('repetition'): determine_state()
-    window.after(1, play_animation)
-    #window.after(1, update)
+    def update(self):
+        self.states_data.get(self.state).get("behaviour")()
+        if self.repetition >= self.animation_repetition: self.set_state(self.pick_state())
+        
+        self.window.after(self.UPDATE_SPD, self.play_animation)
 
-def mouseClick(event):
-    print("meow")
+    def mouseClick(self, event):
+        print("meow")
+    MouseClickEvent = mouseClick
 
-#loop the program
-window.after(1,update)
 
-window.config(highlightbackground="black")
-label = tk.Label(window,bd=0,bg='black')
-window.geometry('100x100')
-label = tk.Label(window,bd=0,bg='black')
+    def start(self):
+        """animal appears in the init state"""
+        print('start pet')
+        self.cycle = 1
+        self.window.after(1,self.update)
 
-label.configure(image=frame)
-label.pack()
+        self.window.config(highlightbackground="black")
+        self.window.geometry('100x100+500+500')
+        
 
-label.bind("<Button>",mouseClick)
+        self.label.configure(image=self.frame)
+        self.label.pack()
 
-window.overrideredirect(True)
-window.wm_attributes('-transparentcolor','black')
+        self.label.bind("<Button>",self.MouseClickEvent)
 
-window.attributes("-topmost",True)
-window.update()
+        self.window.overrideredirect(True)
+        self.window.wm_attributes('-transparentcolor','black')
 
-window.mainloop()
+        self.window.attributes("-topmost",True)
+        self.window.update()
+
+        self.window.mainloop()
+
+def idle_state():
+    # print('idle state')
+    pass
+
+def get_animation_spd_seconds(pet : pet, time_in_miliseconds):
+    return time_in_miliseconds / pet.UPDATE_SPD
+
+if __name__ == "__main__":
+    cat = pet()
+    idle_animation = [tk.PhotoImage(file="animations/idle.gif",format = 'gif -index %i' %(i)) for i in range(5)]
+    cat.add_state('idle', animation=idle_animation, behaviour= idle_state, animation_spd=100, repetition=20)
+    cat.set_state('idle')
+    cat.start()
