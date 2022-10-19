@@ -175,14 +175,3 @@ window.attributes("-topmost",True)
 window.update()
 
 window.mainloop()
-
-class pet():
-
-    def __init__(self) -> None:
-        pass
-
-    def add_state(self, state_name , behaviour_func):
-        print(f'add  {state_name} state')
-
-    def start(self):
-        pass
