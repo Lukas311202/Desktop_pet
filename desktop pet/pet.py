@@ -1,6 +1,9 @@
 import random
 from sre_parse import State
+import string
 import tkinter as tk
+from tokenize import String
+import pyautogui
 
 class pet:
     window = tk.Tk()
@@ -33,7 +36,7 @@ class pet:
         }
 
 
-    def set_state(self, new_state):
+    def set_state(self, new_state : string):
 
         self.state = new_state
         self.animation_spd = self.states_data.get(new_state).get('animation_spd')
@@ -41,7 +44,7 @@ class pet:
         self.animation_frames = len(self.states_data.get(new_state).get('animation'))
         self.cycle = 0
         self.animation_cycle = 0
-        self.repetition = 0
+        self.repetitiodn = 0
     
         print(f'enter state ',new_state)
     
@@ -78,12 +81,20 @@ class pet:
 
     def mouseClick(self, event):
         print("meow")
+        self.set_state('drag')
     MouseClickEvent = mouseClick
+
+    def StopDrag(self, event):
+        """called when the mouse button is released and the pet is stopped drag"""
+        if self.state == 'drag':
+            self.set_state('idle')
 
 
     def start(self):
         """animal appears in the init state"""
         print('start pet')
+
+        self.add_state('drag',animation=[tk.PhotoImage(file="animations/idle.gif",format = 'gif -index %i' %(i)) for i in range(5)],behaviour=self.drag_state ,repetition=999)
         self.cycle = 1
         self.window.after(1,self.update)
 
@@ -95,6 +106,7 @@ class pet:
         self.label.pack()
 
         self.label.bind("<Button>",self.MouseClickEvent)
+        self.label.bind('<ButtonRelease>',self.StopDrag)
 
         self.window.overrideredirect(True)
         self.window.wm_attributes('-transparentcolor','black')
@@ -104,9 +116,17 @@ class pet:
 
         self.window.mainloop()
 
+    def drag_state(self):
+        mouse_pos = pyautogui.position()
+        self.window.geometry('100x100+'+str(mouse_pos[0] - 50)+'+'+str(mouse_pos[1]-50))
+        print('pet is getting dragged')
+
 def idle_state():
     # print('idle state')
     pass
+
+def get_animation_from_path(path : String, frames : int) -> list:
+    return [tk.PhotoImage(file=path, format='gif -index '+str(i)) for i in  range(frames)]
 
 def get_animation_spd_seconds(pet : pet, time_in_miliseconds):
     return time_in_miliseconds / pet.UPDATE_SPD
