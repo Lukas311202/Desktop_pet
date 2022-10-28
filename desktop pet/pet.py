@@ -44,7 +44,7 @@ class pet:
         self.animation_frames = len(self.states_data.get(new_state).get('animation'))
         self.cycle = 0
         self.animation_cycle = 0
-        self.repetitiodn = 0
+        self.repetition = 0
     
         print(f'enter state ',new_state)
     
